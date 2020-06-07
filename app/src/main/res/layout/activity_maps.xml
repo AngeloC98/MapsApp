@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapsActivity">
+    tools:context=".UI.MapsActivity">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -13,9 +13,10 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:clickable="true"
+        android:focusable="true"
+        app:backgroundTint="@color/colorPrimary"
         app:fabSize="normal"
-        app:srcCompat="@drawable/ic_add_black_24dp"
-        android:focusable="true" />
+        app:srcCompat="@drawable/ic_add_white_24dp" />
 
     <fragment
         android:id="@+id/map"
@@ -24,6 +25,6 @@
         android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:context=".MapsActivity" />
+        tools:context=".UI.MapsActivity" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
