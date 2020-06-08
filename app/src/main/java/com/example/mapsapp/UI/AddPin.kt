@@ -2,6 +2,7 @@ package com.example.mapsapp.UI
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.mapsapp.R
 
 class AddPin : AppCompatActivity() {
 
