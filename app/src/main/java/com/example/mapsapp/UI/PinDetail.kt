@@ -24,12 +24,19 @@ class PinDetail : AppCompatActivity() {
     }
 
     private fun initViews() {
-        button.setOnClickListener { finish() }
-
         //get data from intent
         val intent = intent
         id = intent.getStringExtra("pin")
         setFields()
+
+        button.setOnClickListener { finish() }
+        btnDelete.setOnClickListener {
+            db.collection("pins").document(id!!)
+                .delete()
+                .addOnSuccessListener {
+                    finish()
+                }
+        }
     }
 
     private fun setFields() {

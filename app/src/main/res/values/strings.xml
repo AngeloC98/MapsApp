@@ -9,4 +9,5 @@
     <string name="description_text">Description</string>
     <string name="button_save">Save</string>
     <string name="button_back">Back</string>
+    <string name="button_delete">Delete</string>
 </resources>
