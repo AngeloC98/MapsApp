@@ -5,12 +5,15 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.mapsapp.R
+import com.example.mapsapp.model.Pin
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -20,19 +23,24 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_maps.*
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+    private var db = FirebaseFirestore.getInstance()
 
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var providers: List<AuthUI.IdpConfig>
+    private lateinit var user: FirebaseUser
 
+    private val pins = mutableListOf<Pin>()
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
     private val FIREBASE_REQUEST_CODE = 1
-
-    lateinit var providers: List<AuthUI.IdpConfig>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,10 +50,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun initViews() {
+        //  Available register options
         providers = listOf<AuthUI.IdpConfig>(
             AuthUI.IdpConfig.EmailBuilder().build()
         )
 
+        // Init location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val mapFragment = supportFragmentManager
@@ -60,9 +70,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         showSignInOptions()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getPins() {
+        db.collection("pins")
+            .whereEqualTo("user", user.uid)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val pinData = Pin(
+                        id = document.id,
+                        date = document.data["date"] as String?,
+                        description = document.get("description") as String?,
+                        imageUrl = document.data["imageUrl"] as String?,
+                        latitude = document.data["latitude"] as Double?,
+                        longitude = document.data["longitude"] as Double?,
+                        user = document.data["user"] as String?
+                    )
+                    pins.add(pinData)
+                    for (pin in pins) {
+                        val mapData = LatLng(pin.latitude!!, pin.longitude!!)
+                        mMap.addMarker(MarkerOptions().position(mapData).title("Marker: ${pin.description}"))
+                    }
+                }
+            }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+        // Check if location permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED
         ) {
@@ -75,6 +112,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         }
 
+        // Set camera to last location
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 val latitude = location?.latitude
@@ -88,8 +126,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     )
                 )
             }
-
-        //mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
     }
 
     private fun showSignInOptions() {
@@ -100,18 +136,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .build(), FIREBASE_REQUEST_CODE
         )
     }
-
+    
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == FIREBASE_REQUEST_CODE) {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode == Activity.RESULT_OK) {
-                val user = FirebaseAuth.getInstance().currentUser
+                user = FirebaseAuth.getInstance().currentUser!!
+                getPins()
             } else {
                 Toast.makeText(this, "" + response!!.error!!, Toast.LENGTH_SHORT).show()
             }
-
         }
     }
-
 }

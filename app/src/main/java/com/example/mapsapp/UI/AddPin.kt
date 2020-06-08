@@ -36,15 +36,15 @@ class AddPin : AppCompatActivity() {
     private var mStorageRef: StorageReference? = null
     var imageUri: Uri? = null
     var downloadUrl: String? = null
+    var formattedDate: String? = null
+    var latitude: Double? = null
+    var longitude: Double? = null
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationLatLng: LatLng
+
 
     private val PERMISSION_CODE = 1
     private val IMAGE_CAPTURE_CODE = 2
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private val current = LocalDateTime.now()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,16 +63,16 @@ class AddPin : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location ->
-                val latitude = location.latitude
-                val longitude = location.longitude
-                locationLatLng = LatLng(latitude, longitude)
-                val address = getAddress(latitude, longitude)
+                latitude = location.latitude
+                longitude = location.longitude
+                val address = getAddress(latitude!!, longitude!!)
                 tvLocation.text = address
             }
 
         // Format date
+        val current = LocalDateTime.now()
         val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
-        val formattedDate = current.format(formatter)
+        formattedDate = current.format(formatter)
         tvDate.text = formattedDate
 
         if (imageUri != null) ivCamera.setImageURI(imageUri)
@@ -108,13 +108,13 @@ class AddPin : AppCompatActivity() {
     }
 
     // Save to Firestore
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun saveToDatabase() {
         val user = FirebaseAuth.getInstance().currentUser
         val pin = Pin(
             user = user!!.uid,
-            date = current,
-            location = locationLatLng,
+            date = formattedDate,
+            latitude = latitude,
+            longitude = longitude,
             description = etDescription.text.toString(),
             imageUrl = downloadUrl!!
         )
@@ -124,7 +124,6 @@ class AddPin : AppCompatActivity() {
         finish()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun uploadPhoto() {
         val ref: StorageReference =
             mStorageRef!!.child("images/${UUID.randomUUID()}")
