@@ -89,10 +89,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     pins.add(pinData)
                     for (pin in pins) {
                         val mapData = LatLng(pin.latitude!!, pin.longitude!!)
-                        mMap.addMarker(MarkerOptions().position(mapData).title("Marker: ${pin.description}"))
+                        mMap.addMarker(MarkerOptions().position(mapData).title(pin.id))
                         mMap.setOnMarkerClickListener { marker ->
                             val intent = Intent(this, PinDetail::class.java)
-                            intent.putExtra("pin", pin.id)
+                            intent.putExtra("pin", marker.title)
                             startActivity(intent)
                             true
                         }
