@@ -1,12 +1,10 @@
-package com.example.mapsapp.UI
+package com.example.mapsapp.ui
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -109,9 +107,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode == Activity.RESULT_OK) {
                 val user = FirebaseAuth.getInstance().currentUser
-                if (user != null) {
-                    Toast.makeText(this, "" + user.email, Toast.LENGTH_SHORT).show()
-                }
             } else {
                 Toast.makeText(this, "" + response!!.error!!, Toast.LENGTH_SHORT).show()
             }

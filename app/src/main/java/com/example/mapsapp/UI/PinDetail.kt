@@ -1,4 +1,4 @@
-package com.example.mapsapp.UI
+package com.example.mapsapp.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
