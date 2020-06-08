@@ -58,6 +58,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Init location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        showSignInOptions()
+
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -66,8 +68,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent(this, AddPin::class.java)
             startActivity(intent)
         }
-
-        showSignInOptions()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -80,7 +80,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     val pinData = Pin(
                         id = document.id,
                         date = document.data["date"] as String?,
-                        description = document.get("description") as String?,
+                        description = document.data["description"] as String?,
                         imageUrl = document.data["imageUrl"] as String?,
                         latitude = document.data["latitude"] as Double?,
                         longitude = document.data["longitude"] as Double?,
@@ -90,6 +90,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     for (pin in pins) {
                         val mapData = LatLng(pin.latitude!!, pin.longitude!!)
                         mMap.addMarker(MarkerOptions().position(mapData).title("Marker: ${pin.description}"))
+                        mMap.setOnMarkerClickListener { marker ->
+                            val intent = Intent(this, PinDetail::class.java)
+                            intent.putExtra("pin", pin.id)
+                            startActivity(intent)
+                            true
+                        }
                     }
                 }
             }
