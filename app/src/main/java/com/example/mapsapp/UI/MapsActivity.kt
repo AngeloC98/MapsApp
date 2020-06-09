@@ -40,7 +40,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val pins = mutableListOf<Pin>()
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
-    private val FIREBASE_REQUEST_CODE = 1
+    private val FIREBASE_REQUEST_CODE = 2
+    private val INTENT_COMPLETE_CODE= 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +67,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fab.setOnClickListener {
             val intent = Intent(this, AddPin::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, INTENT_COMPLETE_CODE)
         }
     }
 
@@ -93,7 +94,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         mMap.setOnMarkerClickListener { marker ->
                             val intent = Intent(this, PinDetail::class.java)
                             intent.putExtra("pin", marker.title)
-                            startActivity(intent)
+                            startActivityForResult(intent, INTENT_COMPLETE_CODE)
                             true
                         }
                     }
@@ -154,6 +155,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             } else {
                 Toast.makeText(this, "" + response!!.error!!, Toast.LENGTH_SHORT).show()
             }
+        }
+        if(requestCode == INTENT_COMPLETE_CODE) {
+            mMap.clear()
+            pins.clear()
+            getPins()
         }
     }
 }

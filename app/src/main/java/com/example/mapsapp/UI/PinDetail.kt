@@ -33,9 +33,7 @@ class PinDetail : AppCompatActivity() {
         btnDelete.setOnClickListener {
             db.collection("pins").document(id!!)
                 .delete()
-                .addOnSuccessListener {
-                    finish()
-                }
+                .addOnSuccessListener { finish() }
         }
     }
 
